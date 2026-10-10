@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SA Lead Recovery — a simple lead tracking and follow-up dashboard demo for small businesses.">
+<title>SA Lead Recovery | Lead Desk</title>
+<style>
+:root{
+  --bg:#f4f7fb;--surface:#fff;--surface2:#f8fafc;--text:#172033;--muted:#68758a;
+  --line:#e4eaf2;--primary:#3157d5;--primary2:#203fae;--teal:#0c9b83;--amber:#b7791f;
+  --red:#c2414b;--green:#17845d;--shadow:0 12px 35px rgba(25,42,78,.07);--radius:18px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+.app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
+.sidebar{background:#15213a;color:#eaf0ff;padding:25px 17px;display:flex;flex-direction:column;gap:27px}
+.brand{display:flex;align-items:center;gap:11px;padding:0 8px}
+.brand-mark{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(140deg,#70e1ca,#5382ff);color:#10213b;font-weight:900;font-size:18px;box-shadow:0 8px 20px #101b3440}
+.brand-name{font-weight:800;letter-spacing:.2px;font-size:16px}
+.brand-sub{font-size:11px;color:#9eafd0;margin-top:1px}
+.nav-label{font-size:10px;text-transform:uppercase;letter-spacing:1.4px;color:#8090b3;padding:0 12px;margin-bottom:8px}
+.nav{display:grid;gap:5px}
+.nav button{border:0;background:transparent;color:#aebbd4;text-align:left;padding:12px;border-radius:12px;display:flex;align-items:center;gap:12px}
+.nav button:hover,.nav button.active{background:#273653;color:#fff}
+.nav .ico{width:20px;text-align:center;font-size:17px}
+.side-bottom{margin-top:auto;border:1px solid #34425d;border-radius:15px;padding:14px;background:#1b2a45}
+.side-bottom strong{display:block;font-size:13px;margin-bottom:5px}
+.side-bottom p{margin:0;color:#aab8d0;font-size:12px}
+.main{min-width:0;padding:26px clamp(16px,3vw,38px) 36px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:28px}
+.eyebrow{color:var(--primary);font-weight:750;font-size:11px;letter-spacing:1.2px;text-transform:uppercase}
+h1{font-size:clamp(25px,3vw,34px);line-height:1.15;letter-spacing:-1px;margin:5px 0 7px}
+.subtitle{margin:0;color:var(--muted);font-size:14px}
+.top-actions{display:flex;gap:9px;align-items:center}
+.btn{border:1px solid var(--line);border-radius:11px;padding:10px 14px;background:#fff;color:var(--text);font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:.15s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px #17203312}
+.btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn.primary:hover{background:var(--primary2)}
+.btn.ghost{background:transparent}
+.btn.small{padding:7px 10px;font-size:12px}
+.demo-note{display:flex;align-items:flex-start;gap:11px;padding:13px 15px;background:#edf3ff;border:1px solid #dbe6ff;border-radius:13px;color:#28438b;margin-bottom:22px;font-size:13px}
+.demo-note strong{display:block;margin-bottom:2px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:23px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:0 4px 15px #20304c04;min-width:0}
+.stat-top{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px;font-weight:650}
+.stat-icon{width:34px;height:34px;border-radius:11px;background:#edf2ff;display:grid;place-items:center;font-size:16px}
+.stat-num{font-size:29px;font-weight:800;letter-spacing:-1px;margin:13px 0 4px}
+.stat-foot{font-size:11px;color:var(--muted)}
+.stat-foot span{color:var(--green);font-weight:750}
+.content-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(260px,.9fr);gap:18px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 4px 15px #20304c04;min-width:0}
+.panel-head{padding:19px 20px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.panel-head h2{margin:0;font-size:16px;letter-spacing:-.3px}
+.panel-head p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.filters{padding:0 20px 14px;display:flex;gap:9px;flex-wrap:wrap}
+.field{min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fff;color:var(--text);outline:none}
+.field:focus{border-color:#7890e8;box-shadow:0 0 0 3px #3157d51a}
+.filters .field{font-size:12px;flex:1}
+.table-wrap{overflow:auto;border-top:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;min-width:630px}
+th{text-align:left;color:#8792a6;text-transform:uppercase;letter-spacing:.7px;font-size:10px;font-weight:750;background:#fbfcfe;padding:12px 17px}
+td{padding:14px 17px;border-top:1px solid #edf0f5;font-size:12px;vertical-align:middle}
+tbody tr:hover{background:#fbfcff}
+.person{display:flex;align-items:center;gap:10px;min-width:140px}
+.avatar{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:#e9efff;color:#3157d5;font-weight:800;font-size:11px;flex-shrink:0}
+.person strong{display:block;font-size:12px}
+.person small{color:var(--muted);font-size:10px}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:750;white-space:nowrap;background:#eef2f7;color:#526076}
+.pill.new{background:#eaf0ff;color:#3157d5}.pill.follow{background:#fff3d9;color:#96600c}.pill.booked{background:#e1f7ee;color:#087d57}.pill.closed{background:#fce8e8;color:#b43b46}
+.table-actions{display:flex;gap:5px}
+.icon-btn{border:1px solid var(--line);background:#fff;border-radius:8px;width:30px;height:30px;display:grid;place-items:center;color:#65728a}
+.icon-btn:hover{border-color:#aab9ed;color:var(--primary)}
+.empty{padding:32px;text-align:center;color:var(--muted);font-size:13px}
+.right-stack{display:grid;gap:18px}
+.task-list{padding:0 19px 16px;display:grid;gap:10px}
+.task{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--line);border-radius:13px}
+.task-dot{width:9px;height:9px;border-radius:50%;background:#edaa3e;margin-top:5px;flex-shrink:0}
+.task strong{font-size:12px;display:block}
+.task p{font-size:11px;color:var(--muted);margin:3px 0 0}
+.task .task-date{margin-left:auto;color:#a15e08;font-size:10px;white-space:nowrap;font-weight:750}
+.quick-stats{padding:0 19px 19px}
+.mini-row{display:flex;justify-content:space-between;align-items:center;margin:13px 0 7px;font-size:12px}
+.mini-row span:first-child{color:var(--muted)}
+.track{height:7px;border-radius:99px;background:#edf1f7;overflow:hidden}
+.track span{height:100%;display:block;border-radius:99px;background:linear-gradient(90deg,#5276e8,#45c3ac)}
+.activity{padding:0 19px 17px}
+.activity-item{display:flex;gap:10px;padding:11px 0;border-top:1px solid #edf0f5;font-size:11px}
+.activity-item:first-child{border-top:0}
+.activity-icon{width:30px;height:30px;display:grid;place-items:center;background:#f0f4ff;border-radius:10px;flex-shrink:0}
+.activity-item strong{font-size:11px}
+.activity-item p{margin:2px 0 0;color:var(--muted)}
+.footer{display:flex;justify-content:space-between;gap:12px;color:#8a95a8;font-size:11px;margin-top:22px;flex-wrap:wrap}
+.footer strong{color:#647087}
+.overlay{position:fixed;inset:0;background:#101a2c80;display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.overlay.show{display:flex}
+.modal{width:min(540px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:20px;box-shadow:0 25px 90px #0d183344}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:20px 22px;border-bottom:1px solid var(--line)}
+.modal-head h2{font-size:18px;margin:0}
+.close{border:0;background:#f0f3f8;border-radius:9px;width:34px;height:34px;font-size:20px;color:#536078}
+.modal-body{padding:21px 22px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:grid;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:12px;font-weight:750;color:#46536a}
+.form-group .field{width:100%;font-size:13px}
+.form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px}
+.toast{position:fixed;right:20px;bottom:20px;background:#15213a;color:#fff;padding:13px 17px;border-radius:12px;box-shadow:var(--shadow);font-size:13px;z-index:30;display:none;max-width:min(360px,calc(100% - 40px))}
+.toast.show{display:block;animation:pop .2s ease}
+@keyframes pop{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mobile-menu{display:none}
+@media(max-width:1100px){.app{grid-template-columns:215px minmax(0,1fr)}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.content-grid{grid-template-columns:1fr}.right-stack{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.app{grid-template-columns:1fr}.sidebar{display:none}.main{padding:20px 14px 28px}.topbar{align-items:flex-start}.top-actions .export-label{display:none}.top-actions{gap:6px}.top-actions .btn{padding:9px 10px}.stats{gap:9px}.stat{padding:14px}.stat-num{font-size:25px}.stat-top{font-size:11px}.content-grid{gap:13px}.right-stack{grid-template-columns:1fr}.panel-head{padding:16px 15px 12px}.filters{padding:0 15px 13px}.filters .field{min-width:110px}.form-grid{grid-template-columns:1fr}.form-group.full{grid-column:auto}.footer{font-size:10px}}
+@media(max-width:390px){.stats{grid-template-columns:1fr 1fr}.stat-icon{width:29px;height:29px}.top-actions .btn{font-size:11px}.subtitle{font-size:12px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">SA</div>
+      <div><div class="brand-name">SA Lead Recovery</div><div class="brand-sub">CUSTOMER FOLLOW-UP DESK</div></div>
+    </div>
+    <div>
+      <div class="nav-label">Workspace</div>
+      <nav class="nav">
+        <button class="active" data-view="dashboard"><span class="ico">▦</span> Overview</button>
+        <button data-view="leads"><span class="ico">♙</span> All leads</button>
+        <button data-view="followups"><span class="ico">◷</span> Follow-ups</button>
+        <button data-view="reports"><span class="ico">▤</span> Reports</button>
+      </nav>
+    </div>
+    <div class="side-bottom">
+      <strong>Keep every lead visible.</strong>
+      <p>A simple system to track inquiries, next steps and booking outcomes.</p>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">SA DIGITAL STUDIO · DEMO WORKSPACE</div>
+        <h1 id="pageTitle">Lead overview</h1>
+        <p class="subtitle" id="pageSubtitle">See every inquiry, follow-up and opportunity in one place.</p>
+      </div>
+      <div class="top-actions">
+        <button class="btn" id="exportBtn" title="Download leads as CSV">⇩ <span class="export-label">Export CSV</span></button>
+        <button class="btn primary" id="addBtn">＋ Add lead</button>
+      </div>
+    </header>
+
+    <div class="demo-note">
+      <span style="font-size:19px">ⓘ</span>
+      <div><strong>Demo data only</strong>This dashboard saves changes in this browser on this device. It is not connected to WhatsApp, a server, or a live customer database. Use sample data when presenting it to prospects.</div>
+    </div>
+
+    <section class="stats" aria-label="Lead statistics">
+      <div class="stat"><div class="stat-top"><span>Total leads</span><span class="stat-icon">♙</span></div><div class="stat-num" id="totalStat">0</div><div class="stat-foot">All recorded inquiries</div></div>
+      <div class="stat"><div class="stat-top"><span>Needs follow-up</span><span class="stat-icon" style="background:#fff4dc">◷</span></div><div class="stat-num" id="followStat">0</div><div class="stat-foot">Pending next action</div></div>
+      <div class="stat"><div class="stat-top"><span>Bookings</span><span class="stat-icon" style="background:#e3f8ef">✓</span></div><div class="stat-num" id="bookedStat">0</div><div class="stat-foot">Marked as booked</div></div>
+      <div class="stat"><div class="stat-top"><span>Follow-ups due</span><span class="stat-icon" style="background:#ffeded">!</span></div><div class="stat-num" id="dueStat">0</div><div class="stat-foot">Due today or overdue</div></div>
+    </section>
+
+    <div class="content-grid">
+      <section class="panel" id="leadPanel">
+        <div class="panel-head">
+          <div><h2 id="tableTitle">Lead pipeline</h2><p>Track interest and choose the next action.</p></div>
+          <button class="btn small" id="resetBtn" title="Restore sample leads">↻ Reset demo</button>
+        </div>
+        <div class="filters">
+          <input class="field" id="searchInput" type="search" placeholder="Search name, car, phone…" aria-label="Search leads">
+          <select class="field" id="statusFilter" aria-label="Filter by status">
+            <option value="all">All statuses</option><option>New</option><option>Follow-up</option><option>Booked</option><option>Closed</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Customer</th><th>Interested in</th><th>Status</th><th>Next follow-up</th><th>Actions</th></tr></thead>
+            <tbody id="leadRows"></tbody>
+          </table>
+          <div class="empty" id="emptyState" hidden>No leads match your search. Try another filter or add a lead.</div>
+        </div>
+      </section>
+
+      <div class="right-stack">
+        <section class="panel">
+          <div class="panel-head"><div><h2>Follow-up queue</h2><p>Customers needing a next step.</p></div><span class="pill follow" id="queueCount">0 pending</span></div>
+          <div class="task-list" id="taskList"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><div><h2>Pipeline snapshot</h2><p>Current lead status breakdown.</p></div></div>
+          <div class="quick-stats" id="pipelineBars"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><div><h2>Recent activity</h2><p>Latest updates in this demo.</p></div></div>
+          <div class="activity" id="activityList"></div>
+        </section>
+      </div>
+    </div>
+    <footer class="footer"><span>© <span id="year"></span> <strong>SA Lead Recovery</strong> · Concept demo</span><span>Built for small-business follow-up workflows</span></footer>
+  </main>
+</div>
+
+<div class="overlay" id="leadModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <div class="modal-head"><h2 id="modalTitle">Add a lead</h2><button class="close" id="closeModal" aria-label="Close">×</button></div>
+    <form class="modal-body" id="leadForm">
+      <input type="hidden" id="leadId">
+      <div class="form-grid">
+        <div class="form-group"><label for="customerName">Customer name *</label><input class="field" id="customerName" required maxlength="80" placeholder="e.g. Ahmed Khan"></div>
+        <div class="form-group"><label for="phone">Phone / WhatsApp</label><input class="field" id="phone" maxlength="30" placeholder="e.g. 03xx xxxxxxx"></div>
+        <div class="form-group full"><label for="interest">Interested in *</label><input class="field" id="interest" required maxlength="120" placeholder="e.g. Toyota Corolla 2020"></div>
+        <div class="form-group"><label for="status">Status *</label><select class="field" id="status"><option>New</option><option>Follow-up</option><option>Booked</option><option>Closed</option></select></div>
+        <div class="form-group"><label for="nextDate">Next follow-up date</label><input class="field" id="nextDate" type="date"></div>
+        <div class="form-group full"><label for="notes">Notes</label><textarea class="field" id="notes" rows="3" maxlength="500" placeholder="Budget, preferred model, questions, next step…"></textarea></div>
+      </div>
+      <div class="form-actions"><button type="button" class="btn" id="cancelModal">Cancel</button><button type="submit" class="btn primary">Save lead</button></div>
+    </form>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+  const STORAGE_KEY = "saLeadRecoveryDemoV1";
+  const $ = id => document.getElementById(id);
+  const today = new Date();
+  const dateOffset = n => {
+    const d = new Date(); d.setDate(d.getDate() + n);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  };
+  const seedLeads = [
+    {id:"demo-1",name:"Ahmed Khan",phone:"0300 1234567",interest:"Toyota Corolla 2020",status:"Follow-up",nextDate:dateOffset(0),notes:"Asked about final price. Call after 5 PM.",updated:Date.now()-1000*60*18},
+    {id:"demo-2",name:"Sara Malik",phone:"0312 2345678",interest:"Honda Civic 2019",status:"New",nextDate:dateOffset(1),notes:"Wants pictures and mileage details.",updated:Date.now()-1000*60*60*2},
+    {id:"demo-3",name:"Bilal Ahmed",phone:"0333 3456789",interest:"Suzuki Alto 2022",status:"Booked",nextDate:"",notes:"Visit planned. Confirm appointment.",updated:Date.now()-1000*60*60*5},
+    {id:"demo-4",name:"Usman Raza",phone:"0301 4567890",interest:"Toyota Yaris 2021",status:"Follow-up",nextDate:dateOffset(-1),notes:"Comparing two options; follow up politely.",updated:Date.now()-1000*60*60*26},
+    {id:"demo-5",name:"Hira Shah",phone:"0345 5678901",interest:"Honda City 2020",status:"Closed",nextDate:"",notes:"Not proceeding at this time.",updated:Date.now()-1000*60*60*48}
+  ];
+  let leads = loadLeads();
+  let activity = [{text:"Demo workspace opened",time:Date.now()}];
+  let currentView = "dashboard";
+  let toastTimer;
+
+  function loadLeads(){
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : structuredClone(seedLeads);
+    } catch(e) { return seedLeads.map(x=>({...x})); }
+  }
+  function save(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(leads)); } catch(e){} }
+  function escapeHTML(value){
+    return String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+  function niceDate(date){
+    if(!date) return "Not set";
+    const d = new Date(date+"T12:00:00");
+    return d.toLocaleDateString("en-PK",{day:"numeric",month:"short",year:"numeric"});
+  }
+  function relativeDate(date){
+    if(!date) return "No date set";
+    const t = new Date(); t.setHours(0,0,0,0);
+    const d = new Date(date+"T00:00:00"); const diff = Math.round((d-t)/86400000);
+    if(diff < 0) return `${Math.abs(diff)} day${diff===-1?"":"s"} overdue`;
+    if(diff===0) return "Due today";
+    if(diff===1) return "Due tomorrow";
+    return niceDate(date);
+  }
+  function due(leadsList=leads){
+    const todayStr = dateOffset(0);
+    return leadsList.filter(l => ["New","Follow-up"].includes(l.status) && l.nextDate && l.nextDate <= todayStr)
+      .sort((a,b)=>a.nextDate.localeCompare(b.nextDate));
+  }
+  function initials(name){ return String(name||"?").trim().split(/\s+/).slice(0,2).map(p=>p[0]||"").join("").toUpperCase(); }
+  function statusClass(status){ return ({New:"new","Follow-up":"follow",Booked:"booked",Closed:"closed"})[status]||""; }
+  function recordActivity(text){ activity.unshift({text,time:Date.now()}); activity=activity.slice(0,6); }
+  function showToast(message){
+    $("toast").textContent=message; $("toast").classList.add("show");
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>$("toast").classList.remove("show"),3000);
+  }
+  function renderStats(){
+    $("totalStat").textContent=leads.length;
+    $("followStat").textContent=leads.filter(l=>l.status==="Follow-up"||l.status==="New").length;
+    $("bookedStat").textContent=leads.filter(l=>l.status==="Booked").length;
+    $("dueStat").textContent=due().length;
+    $("queueCount").textContent=`${due().length} due`;
+  }
+  function renderTable(){
+    const q=$("searchInput").value.trim().toLowerCase(), filter=$("statusFilter").value;
+    const filtered=leads.filter(l=>(filter==="all"||l.status===filter) && [l.name,l.phone,l.interest,l.notes].join(" ").toLowerCase().includes(q));
+    $("leadRows").innerHTML=filtered.map(l=>`<tr>
+      <td><div class="person"><div class="avatar">${escapeHTML(initials(l.name))}</div><div><strong>${escapeHTML(l.name)}</strong><small>${escapeHTML(l.phone||"No phone added")}</small></div></div></td>
+      <td>${escapeHTML(l.interest)}</td>
+      <td><span class="pill ${statusClass(l.status)}">${escapeHTML(l.status)}</span></td>
+      <td>${escapeHTML(niceDate(l.nextDate))}<br><small style="color:var(--muted)">${escapeHTML(relativeDate(l.nextDate))}</small></td>
+      <td><div class="table-actions"><button class="icon-btn" data-action="edit" data-id="${escapeHTML(l.id)}" title="Edit lead" aria-label="Edit ${escapeHTML(l.name)}">✎</button><button class="icon-btn" data-action="status" data-id="${escapeHTML(l.id)}" title="Change status" aria-label="Change status for ${escapeHTML(l.name)}">↻</button><button class="icon-btn" data-action="delete" data-id="${escapeHTML(l.id)}" title="Delete lead" aria-label="Delete ${escapeHTML(l.name)}">×</button></div></td>
+    </tr>`).join("");
+    $("emptyState").hidden=filtered.length>0;
+  }
+  function renderTasks(){
+    const tasks=due().slice(0,5);
+    $("taskList").innerHTML=tasks.length ? tasks.map(l=>`<div class="task"><span class="task-dot"></span><div style="min-width:0;flex:1"><strong>${escapeHTML(l.name)}</strong><p>${escapeHTML(l.interest)}</p><p>${escapeHTML(relativeDate(l.nextDate))}</p></div><span class="task-date">${l.nextDate<dateOffset(0)?"OVERDUE":"TODAY"}</span></div>`).join("") :
+      `<div class="empty">You're all caught up. No follow-ups are due today.</div>`;
+  }
+  function renderPipeline(){
+    const statuses=["New","Follow-up","Booked","Closed"], total=Math.max(leads.length,1);
+    $("pipelineBars").innerHTML=statuses.map(s=>{
+      const count=leads.filter(l=>l.status===s).length, pct=Math.round(count/total*100);
+      const color=s==="Booked"?"#22a879":s==="Follow-up"?"#e4a33b":s==="Closed"?"#d66b73":"#5276e8";
+      return `<div class="mini-row"><span>${s}</span><strong>${count} <span style="color:#98a2b3;font-weight:500">(${pct}%)</span></strong></div><div class="track"><span style="width:${pct}%;background:${color}"></span></div>`;
+    }).join("");
+  }
+  function renderActivity(){
+    $("activityList").innerHTML=activity.map(a=>`<div class="activity-item"><div class="activity-icon">↗</div><div><strong>${escapeHTML(a.text)}</strong><p>${new Date(a.time).toLocaleTimeString("en-PK",{hour:"numeric",minute:"2-digit"})}</p></div></div>`).join("");
+  }
+  function render(){
+    renderStats();renderTable();renderTasks();renderPipeline();renderActivity();
+    const views={
+      dashboard:["Lead overview","See every inquiry, follow-up and opportunity in one place.","Lead pipeline"],
+      leads:["All leads","Search, update and organize customer inquiries.","All leads"],
+      followups:["Follow-up desk","Review leads that need a next action today or earlier.","Follow-up queue"],
+      reports:["Pipeline reports","A simple snapshot of the lead statuses in this demo.","Lead pipeline"]
+    };
+    $("pageTitle").textContent=views[currentView][0];$("pageSubtitle").textContent=views[currentView][1];$("tableTitle").textContent=views[currentView][2];
+    if(currentView==="followups"){ $("statusFilter").value="all"; $("searchInput").value=""; }
+  }
+  function openModal(lead){
+    $("leadForm").reset();
+    $("leadId").value=lead?.id||"";
+    $("modalTitle").textContent=lead?"Edit lead":"Add a lead";
+    $("customerName").value=lead?.name||"";
+    $("phone").value=lead?.phone||"";
+    $("interest").value=lead?.interest||"";
+    $("status").value=lead?.status||"New";
+    $("nextDate").value=lead?.nextDate||"";
+    $("notes").value=lead?.notes||"";
+    $("leadModal").classList.add("show");
+    setTimeout(()=>$("customerName").focus(),50);
+  }
+  function closeModal(){ $("leadModal").classList.remove("show"); }
+  $("addBtn").addEventListener("click",()=>openModal());
+  $("closeModal").addEventListener("click",closeModal);
+  $("cancelModal").addEventListener("click",closeModal);
+  $("leadModal").addEventListener("click",e=>{if(e.target===$("leadModal"))closeModal();});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+  $("leadForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const id=$("leadId").value||`lead-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+    const old=leads.find(l=>l.id===id);
+    const lead={id,name:$("customerName").value.trim(),phone:$("phone").value.trim(),interest:$("interest").value.trim(),status:$("status").value,nextDate:$("nextDate").value,notes:$("notes").value.trim(),updated:Date.now()};
+    if(old){leads=leads.map(l=>l.id===id?lead:l);recordActivity(`Updated lead: ${lead.name}`);showToast("Lead updated.");}
+    else {leads.unshift(lead);recordActivity(`Added lead: ${lead.name}`);showToast("Lead saved to this browser.");}
+    save();closeModal();render();
+  });
+  $("leadRows").addEventListener("click",e=>{
+    const btn=e.target.closest("button[data-action]");if(!btn)return;
+    const lead=leads.find(l=>l.id===btn.dataset.id);if(!lead)return;
+    if(btn.dataset.action==="edit")openModal(lead);
+    if(btn.dataset.action==="delete"){
+      if(confirm(`Delete ${lead.name} from this demo?`)){leads=leads.filter(l=>l.id!==lead.id);recordActivity(`Deleted lead: ${lead.name}`);save();render();showToast("Lead deleted.");}
+    }
+    if(btn.dataset.action==="status"){
+      const sequence=["New","Follow-up","Booked","Closed"];
+      lead.status=sequence[(sequence.indexOf(lead.status)+1)%sequence.length];
+      if(lead.status==="Booked"||lead.status==="Closed")lead.nextDate="";
+      lead.updated=Date.now();recordActivity(`Changed ${lead.name} status to ${lead.status}`);save();render();showToast(`Status changed to ${lead.status}.`);
+    }
+  });
+  $("searchInput").addEventListener("input",renderTable);
+  $("statusFilter").addEventListener("change",renderTable);
+  document.querySelectorAll(".nav button").forEach(btn=>btn.addEventListener("click",()=>{
+    currentView=btn.dataset.view;
+    document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b===btn));
+    if(currentView==="followups"){$("statusFilter").value="all";$("searchInput").value="";}
+    if(currentView==="leads"){$("statusFilter").value="all";}
+    if(currentView==="reports"){$("statusFilter").value="all";}
+    render();
+    if(currentView==="followups"){$("statusFilter").value="all";}
+    if(currentView==="followups")showToast(`${due().length} follow-up(s) due today or overdue.`);
+    if(currentView==="leads"||currentView==="followups")$("leadPanel").scrollIntoView({behavior:"smooth",block:"start"});
+    if(currentView==="reports")document.querySelector(".right-stack").scrollIntoView({behavior:"smooth",block:"start"});
+  }));
+  $("resetBtn").addEventListener("click",()=>{
+    if(confirm("Restore the original sample leads? This replaces the current demo data in this browser.")){
+      leads=seedLeads.map(x=>({...x}));save();activity=[];recordActivity("Sample leads restored");render();showToast("Sample data restored.");
+    }
+  });
+  $("exportBtn").addEventListener("click",()=>{
+    const cols=["name","phone","interest","status","nextDate","notes"];
+    const csv=[cols.join(","),...leads.map(l=>cols.map(k=>`"${String(l[k]||"").replace(/"/g,'""')}"`).join(","))].join("\r\n");
+    const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download="sa-lead-recovery-demo.csv";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+    showToast("CSV exported.");
+  });
+  $("year").textContent=new Date().getFullYear();
+  render();
+})();
+</script>
+</body>
+</html>
